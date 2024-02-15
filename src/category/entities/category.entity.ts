@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Item } from '../../item/entities/item.entity';
 
 @Entity({ name: 'category' })
 export class Category {
@@ -15,5 +16,8 @@ export class Category {
 
   @OneToMany(() => Category, (child) => child.parent)
   children: Category[];
+
+  @OneToMany(() => Item, (item) => item.category)
+  items: Item[];
 
 }

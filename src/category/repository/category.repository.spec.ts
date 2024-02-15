@@ -3,8 +3,8 @@ import { Category } from '../entities/category.entity';
 import { initialiseTestTransactions, runInTransaction } from 'typeorm-test-transactions';
 import { CategoryRepository } from './category.repository';
 import { CategoryModule } from '../category.module';
-import { DatabaseModule } from '../../database/database.module';
-import { AppModule } from '../../app.module';
+import { DatabaseModule } from '@/database/database.module';
+import { AppModule } from '@/app.module';
 import { INestApplication } from '@nestjs/common';
 
 initialiseTestTransactions();
@@ -29,12 +29,11 @@ describe('CategoryRepository', () => {
 
   afterAll(async () => await app.close());
 
-  it('should return found category', async () => {
+  it('should save category', async () => {
 
     runInTransaction(async () => {
       const category = await repository
         .save({
-          id: 1,
           name: 'electronics',
           parent: undefined,
           children: [] as Category[],

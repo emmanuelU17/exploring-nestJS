@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateCategoryDto } from '../dto/create-category.dto';
-import { CustomDuplicateException } from '../../exception/custom-duplicate.exception';
+import { CustomDuplicateException } from '@/exception/custom-duplicate.exception';
 import { Category } from '../entities/category.entity';
 import { CategoryRepository } from '../repository/category.repository';
-import { CustomNotFoundException } from '../../exception/custom-not-found.exception';
+import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
 
 @Injectable()
 export class CategoryService {

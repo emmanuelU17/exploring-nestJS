@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { Category } from '../entities/category.entity';
 import { Injectable } from '@nestjs/common';
-import { CustomNotFoundException } from '../../exception/custom-not-found.exception';
+import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
