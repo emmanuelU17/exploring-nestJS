@@ -29,7 +29,7 @@ import { MySqlContainer } from '@testcontainers/mysql';
             username: container.getUsername(),
             password: container.getUserPassword(),
             database: container.getDatabase(),
-            synchronize: true,
+            synchronize: false,
             autoLoadEntities: true,
           };
           return obj;
