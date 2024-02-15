@@ -1,24 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { initialiseTestTransactions, runInTransaction } from 'typeorm-test-transactions';
-import { DatabaseModule } from '../../database/database.module';
-import { AppModule } from '../../app.module';
+import { DatabaseModule } from '@/database/database.module';
+import { AppModule } from '@/app.module';
 import { INestApplication } from '@nestjs/common';
 import { ItemRepository } from './item.repository';
 import { ItemModule } from '../item.module';
-import { CategoryRepository } from '../../category/repository/category.repository';
+import { CategoryRepository } from '@/category/repository/category.repository';
 import { CategoryModule } from '@/category/category.module';
-import { Category } from '../../category/entities/category.entity';
+import { Category } from '@/category/entities/category.entity';
 
 initialiseTestTransactions();
 
-describe('CategoryRepository', () => {
+describe('ItemRepository', () => {
   let app: INestApplication;
   let categoryRepository: CategoryRepository;
   let itemRepository: ItemRepository;
 
   jest.setTimeout(60000);
 
-  // Start the whole app as it connects to database.
   beforeAll(async () => {
     const module: TestingModule = await Test
       .createTestingModule({
@@ -33,7 +32,7 @@ describe('CategoryRepository', () => {
 
   afterAll(async () => await app.close());
 
-  it('should save item', async () => {
+  it('should save Item', async () => {
 
     runInTransaction(async () => {
       const category = await categoryRepository
@@ -56,5 +55,33 @@ describe('CategoryRepository', () => {
 
   });
 
+  it('should throw error as Item name exists', async () => {
+
+    runInTransaction(async () => {
+      const category = await categoryRepository
+        .save({
+          name: 'electronics',
+          parent: undefined,
+          children: [] as Category[],
+        });
+
+      await itemRepository
+        .save({
+          name: 'ps5',
+          price: 19.50,
+          category: category,
+        });
+
+      expect(
+        await itemRepository
+          .save({
+            name: 'ps5',
+            price: 10.50,
+            category: category,
+          }))
+        .toThrow('');
+    });
+
+  });
 
 });

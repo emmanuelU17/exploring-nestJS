@@ -15,7 +15,6 @@ describe('CategoryRepository', () => {
 
   jest.setTimeout(60000);
 
-  // Start the whole app as it connects to database.
   beforeAll(async () => {
     const module: TestingModule = await Test
       .createTestingModule({
@@ -29,7 +28,7 @@ describe('CategoryRepository', () => {
 
   afterAll(async () => await app.close());
 
-  it('should save category', async () => {
+  it('should save Category', async () => {
 
     runInTransaction(async () => {
       const category = await repository

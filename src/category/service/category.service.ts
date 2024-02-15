@@ -4,6 +4,7 @@ import { CustomDuplicateException } from '@/exception/custom-duplicate.exception
 import { Category } from '../entities/category.entity';
 import { CategoryRepository } from '../repository/category.repository';
 import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
+import { Item } from '@/item/entities/item.entity';
 
 @Injectable()
 export class CategoryService {
@@ -52,10 +53,10 @@ export class CategoryService {
     try {
       await this.repository
         .save({
-          id: 1,
           name: dto.name,
           parent: parent,
           children: [] as Category[],
+          items: [] as Item[]
         });
     } catch (e) {
       CategoryService.log.error('error creating category: ', e);
