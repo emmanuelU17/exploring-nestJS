@@ -60,7 +60,10 @@ export class CategoryService {
           items: [] as Item[]
         })
 
-      await this.repository.save(category);
+      await this.repository.manager
+        .transaction(async (manager) => {
+          await manager.save(category);
+        })
     } catch (e) {
       CategoryService.log.error('error creating category: ', e);
       throw new CustomDuplicateException(`${dto.name} exists.`);

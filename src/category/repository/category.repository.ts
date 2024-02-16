@@ -26,13 +26,22 @@ export class CategoryRepository extends Repository<Category> {
   }
 
   /**
-   * Updates a {@link Category} based on unique identifier
-   * (primary key). Also updates the parent_id if it is
-   * defined in the dto.
-   * */
+   * Updates a {@link Category} based on its unique identifier (primary key).
+   * This method allows for modifying the category's name and parent category ID.
+   * If a parent category ID is provided in the DTO, it will be updated accordingly.
+   * Note that this operation is transactional, ensuring data consistency and rollback
+   * in case of errors.
+   *
+   * @param dto The DTO (Data Transfer Object) containing the update information,
+   *            including the category ID, new name, and optional parent category ID.
+   * @returns A Promise that resolves once the update operation is successfully completed.
+   *          It does not return any value.
+   */
   async updateByCategoryId(dto: UpdateCategoryDto): Promise<void> {
-    await super
-      .query(`
+    await this.repository.manager
+      .transaction(async (manage) => {
+        await manage
+          .query(`
           UPDATE category c
           SET c.name = ${dto.name}, c.parent_id = (
                 CASE WHEN (${dto.parentId} !== ${undefined} OR ${dto.parentId} !== ${null})
@@ -41,6 +50,7 @@ export class CategoryRepository extends Repository<Category> {
               )
           WHERE c.category_id = ${dto.categoryId}
       `);
+    })
   }
 
 }
