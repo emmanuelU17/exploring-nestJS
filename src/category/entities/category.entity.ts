@@ -7,7 +7,7 @@ export class Category {
   @PrimaryGeneratedColumn('identity', { name: 'category_id', type: 'bigint', generatedIdentity: 'ALWAYS' })
   id: number;
 
-  @Column('varchar', { length: 50, nullable: false, unique: true })
+  @Column('varchar', { length: 20, nullable: false, unique: true })
   name: string;
 
   @ManyToOne(() => Category, (parent) => parent.children)

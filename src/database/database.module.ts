@@ -2,37 +2,29 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MySqlContainer } from '@testcontainers/mysql';
-import { DataSourceOptions } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'test')
-      ? async () => {
-        const container = await new MySqlContainer()
-          .withUsername('explore')
-          .withUserPassword('explore')
-          .withRootPassword('explore')
-          .withDatabase('explore_db')
-          .start();
+      useFactory: async (service: ConfigService) => {
+        if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'test') {
+          const container = await new MySqlContainer()
+            .withUsername('explore')
+            .withUserPassword('explore')
+            .withRootPassword('explore')
+            .withDatabase('explore_db')
+            .start();
 
-        const obj: DataSourceOptions = {
-          type: 'mysql',
-          host: container.getHost(),
-          port: container.getPort(),
-          username: container.getUsername(),
-          password: container.getUserPassword(),
-          database: container.getDatabase(),
-          synchronize: false,
-          entities: ['dist/**/*.entity.js'],
-          migrations: ['dist/db/migration/*js'],
-        };
+          process.env.MYSQL_HOST = container.getHost();
+          process.env.MYSQL_PORT = container.getPort().toString();
+          process.env.MYSQL_USERNAME = container.getUsername();
+          process.env.MYSQL_PASSWORD = container.getUserPassword();
+          process.env.MYSQL_DATABASE = container.getDatabase();
+        }
 
-        return obj;
-      }
-      : (service: ConfigService) => {
         const obj: DataSourceOptions = {
           type: 'mysql',
           host: service.getOrThrow<string>('MYSQL_HOST'),
@@ -40,12 +32,21 @@ import { DataSourceOptions } from 'typeorm';
           username: service.getOrThrow<string>('MYSQL_USERNAME'),
           password: service.getOrThrow<string>('MYSQL_PASSWORD'),
           database: service.getOrThrow<string>('MYSQL_DATABASE'),
-          synchronize: false, // Think of this as hibernate create-drop. default is false means we want to use migrations.
+          synchronize: false, // think of this as hibernate create-drop. default is false means we want to use migrations.
           entities: ['dist/**/*.entity.js'],
-          migrations: ['dist/db/migration/*js'],
+          migrations: ['dist/migration/*js'],
         };
         return obj;
-      }
+      },
+      dataSourceFactory: async (options) => {
+        console.log('datasource options ', options);
+        // process.env.MYSQL_HOST = options.;
+        // process.env.MYSQL_PORT = container.getPort().toString();
+        // process.env.MYSQL_USERNAME = container.getUsername();
+        // process.env.MYSQL_PASSWORD = container.getUserPassword();
+        // process.env.MYSQL_DATABASE = container.getDatabase();
+        return await new DataSource(options).initialize();
+      },
     }),
   ],
 })

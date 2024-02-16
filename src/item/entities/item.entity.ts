@@ -7,7 +7,7 @@ export class Item {
   @PrimaryGeneratedColumn('identity', { name: 'item_id', type: 'bigint', generatedIdentity: 'ALWAYS' })
   id: number;
 
-  @Column('varchar', { length: 50, nullable: false, unique: true })
+  @Column('varchar', { length: 30, nullable: false, unique: true })
   name: string;
 
   @Column('decimal', { nullable: false })
