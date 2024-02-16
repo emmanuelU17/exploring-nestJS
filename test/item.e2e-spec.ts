@@ -1,12 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { initialiseTestTransactions, runInTransaction } from 'typeorm-test-transactions';
-import { DatabaseModule } from '@/database/database.module';
 import { AppModule } from '@/app.module';
 import { INestApplication } from '@nestjs/common';
-import { ItemRepository } from './item.repository';
-import { ItemModule } from '../item.module';
+import { ItemRepository } from '@/item/repository/item.repository';
 import { CategoryRepository } from '@/category/repository/category.repository';
-import { CategoryModule } from '@/category/category.module';
 import { Category } from '@/category/entities/category.entity';
 
 initialiseTestTransactions();
@@ -21,13 +18,15 @@ describe('ItemRepository', () => {
   beforeAll(async () => {
     const module: TestingModule = await Test
       .createTestingModule({
-        imports: [AppModule, DatabaseModule, CategoryModule, ItemModule],
+        imports: [AppModule],
       })
       .compile();
 
     app = module.createNestApplication();
     itemRepository = module.get<ItemRepository>(ItemRepository);
     categoryRepository = module.get<CategoryRepository>(CategoryRepository);
+
+    await app.init();
   });
 
   afterAll(async () => await app.close());

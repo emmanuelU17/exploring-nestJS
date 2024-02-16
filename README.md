@@ -55,7 +55,7 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
+# e2e and data access layer tests
 $ npm run test:e2e
 
 # test coverage
@@ -63,6 +63,7 @@ $ npm run test:cov
 ```
 
 ## Links
-[getting started testcontainer](https://testcontainers.com/guides/getting-started-with-testcontainers-for-nodejs/)
+[Getting started TestContainer](https://testcontainers.com/guides/getting-started-with-testcontainers-for-nodejs/)
+[TypeORM migrations](https://typeorm.io/migrations)
 
 ## Architecture

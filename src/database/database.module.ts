@@ -1,13 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MySqlContainer } from '@testcontainers/mysql';
 
-/**
- * Use Testcontainers to connect to mysql database
- * if in development or test mode. In all dev and
- * test scripts in package.json, NODE_ENV is set.
- * */
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -22,17 +17,16 @@ import { MySqlContainer } from '@testcontainers/mysql';
             .withDatabase('explore_db')
             .start();
 
-          const obj: TypeOrmModuleOptions = {
+          return {
             type: 'mysql',
             host: container.getHost(),
             port: container.getPort(),
             username: container.getUsername(),
             password: container.getUserPassword(),
             database: container.getDatabase(),
-            synchronize: false,
+            synchronize: true,
             autoLoadEntities: true,
           };
-          return obj;
         }
         : (service: ConfigService) => ({
           type: 'mysql',
