@@ -63,7 +63,7 @@ $ npm run test:cov
 ```
 
 ## Links
-[Getting started TestContainer](https://testcontainers.com/guides/getting-started-with-testcontainers-for-nodejs/)
-[TypeORM migrations](https://typeorm.io/migrations)
+1. [Getting started TestContainer](https://testcontainers.com/guides/getting-started-with-testcontainers-for-nodejs/)
+2. [TypeORM migrations](https://typeorm.io/migrations)
 
 ## Architecture

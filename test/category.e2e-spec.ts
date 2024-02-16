@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { API_PREFIX } from '@/util';
 import { AppModule } from '@/app.module';
@@ -98,6 +98,61 @@ describe('CategoryController (e2e) and Data Access Layer test', () => {
     });
   });
 
+  it('should update category ', async () => {
+    runInTransaction(async () => {
+      // given
+      const cat = await repository
+        .save({
+          name: 'electronics',
+          parent: undefined,
+          children: [] as Category[],
+        });
+
+      // when
+      await repository
+        .updateByCategoryId({ categoryId: cat.id, name : 'clothing' });
+      const cur = await repository.findOneBy({ id: cat.id })
+
+      // then
+      expect(cur).toBeDefined();
+      expect(cur.name).toEqual('clothing');
+      expect(cur.parent).toBeUndefined();
+    })
+  });
+
+  it('should update category and parent id ', async () => {
+    runInTransaction(async () => {
+      // given
+      const cat = await repository
+        .save({
+          name: 'electronics',
+          parent: undefined,
+        });
+
+      const clothes = await repository
+        .save({
+          name: 'clothes',
+          parent: cat,
+        });
+
+      const collection = await repository
+        .save({
+          name: 'collection',
+          parent: undefined,
+        });
+
+      // when
+      await repository
+        .updateByCategoryId({ categoryId: clothes.id, name : 'house', parentId: collection.id });
+      const cur = await repository.findOneBy({ id: clothes.id })
+
+      // then
+      expect(cur).toBeDefined();
+      expect(cur.name).toEqual('house');
+      expect(cur.parent).toEqual(collection);
+    })
+  });
+
   it(`${API_PREFIX}category (POST)`, async () => {
     runInTransaction(async () => {
       await request(app.getHttpServer())
@@ -120,7 +175,7 @@ describe('CategoryController (e2e) and Data Access Layer test', () => {
       await request(app.getHttpServer())
         .post(`${API_PREFIX}category`)
         .send({ name: 'electronics', parent_id: null })
-        .expect(210)
+        .expect(HttpStatus.CONFLICT)
         .expect({});
     })
   });

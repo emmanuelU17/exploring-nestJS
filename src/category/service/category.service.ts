@@ -5,6 +5,7 @@ import { Category } from '../entities/category.entity';
 import { CategoryRepository } from '../repository/category.repository';
 import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
 import { Item } from '@/item/entities/item.entity';
+import { UpdateCategoryDto } from '@/category/dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -51,17 +52,23 @@ export class CategoryService {
     }
 
     try {
-      await this.repository
-        .save({
+      const category = this.repository
+        .create({
           name: dto.name,
           parent: parent,
           children: [] as Category[],
           items: [] as Item[]
-        });
+        })
+
+      await this.repository.save(category);
     } catch (e) {
       CategoryService.log.error('error creating category: ', e);
       throw new CustomDuplicateException(`${dto.name} exists.`);
     }
+  }
+
+  async update(dto: UpdateCategoryDto): Promise<void> {
+    await this.repository.updateByCategoryId(dto);
   }
 
 }

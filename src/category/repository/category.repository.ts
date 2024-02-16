@@ -3,6 +3,7 @@ import { Category } from '../entities/category.entity';
 import { Injectable } from '@nestjs/common';
 import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateCategoryDto } from '@/category/dto/update-category.dto';
 
 @Injectable()
 export class CategoryRepository extends Repository<Category> {
@@ -22,6 +23,24 @@ export class CategoryRepository extends Repository<Category> {
       return find;
 
     throw new CustomNotFoundException(`${name} does not exist`);
+  }
+
+  /**
+   * Updates a {@link Category} based on unique identifier
+   * (primary key). Also updates the parent_id if it is
+   * defined in the dto.
+   * */
+  async updateByCategoryId(dto: UpdateCategoryDto): Promise<void> {
+    await super
+      .query(`
+          UPDATE category c
+          SET c.name = ${dto.name}, c.parent_id = (
+                CASE WHEN (${dto.parentId} !== ${undefined} OR ${dto.parentId} !== ${null})
+                    THEN ${dto.parentId}
+                    ELSE c.parent_id
+              )
+          WHERE c.category_id = ${dto.categoryId}
+      `);
   }
 
 }

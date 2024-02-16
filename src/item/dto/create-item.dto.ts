@@ -12,7 +12,6 @@ export class CreateItemDto {
 
   @IsNumber({ allowNaN: false, }, { message: 'cannot be negative or null'})
   @IsDefined()
-  @IsNumber()
   readonly price: number;
 
 }
