@@ -1,12 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { register } from 'tsconfig-paths';
 
 config();
 
 const service = new ConfigService();
-
-import { register } from 'tsconfig-paths';
 
 register({
   baseUrl: __dirname,

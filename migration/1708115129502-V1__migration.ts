@@ -14,7 +14,10 @@ export class V1_migration1708115129502 implements MigrationInterface {
                   CONSTRAINT category_fk FOREIGN KEY (parent_id)
                     REFERENCES category (category_id) ON DELETE RESTRICT
               );
+          `);
 
+        await runner
+          .query(`
               CREATE TABLE IF NOT EXISTS item
               (
                   item_id BIGINT UNIQUE NOT NULL AUTO_INCREMENT,
