@@ -6,6 +6,15 @@ config();
 
 const service = new ConfigService();
 
+import { register } from 'tsconfig-paths';
+
+register({
+  baseUrl: __dirname,
+  paths: {
+    '@/*': ['src/*']
+  }
+});
+
 export const source = new DataSource({
   type: 'mysql',
   host: service.getOrThrow<string>('MYSQL_HOST'),
