@@ -13,7 +13,7 @@ export class Item {
   @Column('decimal', { nullable: false })
   price: number;
 
-  @ManyToOne(() => Category, (cat) => cat.items, { nullable: false })
+  @ManyToOne(() => Category, (cat) => cat.items)
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
   category: Category;
 

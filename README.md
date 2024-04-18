@@ -65,5 +65,6 @@ $ npm run test:cov
 ## Links
 1. [Getting started TestContainer](https://testcontainers.com/guides/getting-started-with-testcontainers-for-nodejs/)
 2. [TypeORM migrations](https://typeorm.io/migrations)
+3. [Snake Naming Strategy](https://socket.dev/npm/package/typeorm-naming-strategy)
 
 ## Architecture

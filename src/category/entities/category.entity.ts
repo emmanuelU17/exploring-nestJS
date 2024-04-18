@@ -11,7 +11,7 @@ export class Category {
   name: string;
 
   @ManyToOne(() => Category, (parent) => parent.children)
-  @JoinColumn({ name: 'parent_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'parent_id', referencedColumnName: 'id', foreignKeyConstraintName: 'category_fk' })
   parent?: Category;
 
   @OneToMany(() => Category, (child) => child.parent)

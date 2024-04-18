@@ -1,5 +1,4 @@
-import { MySqlContainer, StartedMySqlContainer } from '@testcontainers/mysql';
-import process from 'process';
+import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from 'testcontainers';
 
 /**
  * Versions each route for our application.
@@ -9,21 +8,37 @@ import process from 'process';
 export const API_PREFIX = '/api/v1/';
 
 /**
- * Implementation to set db variables when in dev or test mode.
- * */
-export async function MYSQL_CONTAINER(): Promise<StartedMySqlContainer> {
-  const container = await new MySqlContainer()
-    .withUsername('explore')
-    .withUserPassword('explore')
-    .withRootPassword('explore')
-    .withDatabase('explore_db')
-    .start();
+ * A utility class for managing Docker Compose environments using
+ * {@link Testcontainers} library.
+ * @see https://node.testcontainers.org/features/compose/
+ */
+export class CustomCompose {
+  /** The reference to the started Docker Compose environment. */
+  private static _compose: StartedDockerComposeEnvironment;
 
-  process.env.MYSQL_HOST = container.getHost();
-  process.env.MYSQL_PORT = String(container.getPort());
-  process.env.MYSQL_USERNAME = container.getUsername();
-  process.env.MYSQL_PASSWORD = container.getUserPassword();
-  process.env.MYSQL_DATABASE = container.getDatabase();
+  /**
+   * Starts the Docker Compose environment and initializes the _compose
+   * property.
+   *
+   * @returns a Promise that resolves when the Docker Compose environment
+   * is started.
+   * */
+  public static async composeUp(): Promise<void> {
+    if (CustomCompose._compose) return;
 
-  return container
+    CustomCompose._compose = await new DockerComposeEnvironment('./', 'compose.yaml',)
+      .withWaitStrategy('mysql', Wait.forHealthCheck())
+      .up();
+  }
+
+  /**
+   * Stops the Docker Compose environment if it is initialized.
+   *
+   * @returns a Promise that resolves when the Docker Compose
+   * environment is stopped.
+   * */
+  public static async composeDown(): Promise<void> {
+    const compose = CustomCompose._compose;
+    if (compose) await compose.stop();
+  }
 }

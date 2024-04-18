@@ -13,7 +13,7 @@ describe('CategoryController (e2e) and Data Access Layer test', () => {
   let app: INestApplication;
   let repository: CategoryRepository;
 
-  jest.setTimeout(60000);
+  jest.setTimeout(6000000);
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({

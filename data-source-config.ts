@@ -13,6 +13,7 @@ export const source = new DataSource({
   username: service.getOrThrow<string>('MYSQL_USERNAME'),
   password: service.getOrThrow<string>('MYSQL_PASSWORD'),
   database: service.getOrThrow<string>('MYSQL_DATABASE'),
-  entities: ['dist/**/*.entity.js'],
-  migrations: ['dist/db/migration/*js'],
+  synchronize: false,
+  entities: ['src/**/*.entity.ts'],
+  migrations: ['migration/*.ts'],
 });
