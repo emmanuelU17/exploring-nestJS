@@ -19,11 +19,11 @@ jobs:
       - name: Start Docker-Compose
         run: docker compose up -d
 
-      - name: Run migration
-        run: npm run typeorm:run
-
       - name: NPM install
         run: npm install
+
+      - name: Run migration
+        run: npm run typeorm:run
 
       - name: E2E test
         run: npm run test:e2e
