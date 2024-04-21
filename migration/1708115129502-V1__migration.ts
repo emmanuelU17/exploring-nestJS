@@ -10,7 +10,6 @@ export class V1_migration1708115129502 implements MigrationInterface {
     }
 
     public async down(runner: QueryRunner): Promise<void> {
-        runner.query(`DROP TABLE IF EXISTS item, category;`);
+        await runner.query(`DROP TABLE IF EXISTS item, category;`);
     }
-
 }
