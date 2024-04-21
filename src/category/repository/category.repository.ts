@@ -16,11 +16,12 @@ export class CategoryRepository extends Repository<Category> {
   }
 
   async categoryByName(name: string): Promise<Category> {
-    const find = await super
-      .query(`SELECT * FROM category c WHERE c.name = ${name}`);
+    const all: Category[] = await this.repository.query(
+      `SELECT * FROM category c WHERE c.name = ?`,
+      [name],
+    );
 
-    if (find)
-      return find;
+    if (all) return all[0];
 
     throw new CustomNotFoundException(`${name} does not exist`);
   }
