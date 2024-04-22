@@ -10,11 +10,11 @@ const service = new ConfigService();
 register({
   baseUrl: __dirname,
   paths: {
-    '@/*': ['src/*']
-  }
+    '@/*': ['src/*'],
+  },
 });
 
-export const source = new DataSource({
+export const MY_APP_DATASOURCE = new DataSource({
   type: 'mysql',
   host: service.getOrThrow<string>('MYSQL_HOST'),
   port: service.getOrThrow<number>('MYSQL_PORT'),

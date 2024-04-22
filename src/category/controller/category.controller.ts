@@ -5,7 +5,6 @@ import { API_PREFIX } from '@/util';
 
 @Controller(`${API_PREFIX}category`)
 export class CategoryController {
-
   constructor(private readonly service: CategoryService) {}
 
   @Post()
@@ -13,5 +12,4 @@ export class CategoryController {
   async create(@Body() dto: CreateCategoryDto): Promise<void> {
     await this.service.create(dto);
   }
-
 }

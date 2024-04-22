@@ -1,10 +1,19 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Category } from '@/category/entities/category.entity';
 
 @Entity({ name: 'item' })
 export class Item {
-
-  @PrimaryGeneratedColumn('identity', { name: 'item_id', type: 'bigint', generatedIdentity: 'ALWAYS' })
+  @PrimaryGeneratedColumn('identity', {
+    name: 'item_id',
+    type: 'bigint',
+    generatedIdentity: 'ALWAYS',
+  })
   id: number;
 
   @Column('varchar', { length: 30, nullable: false, unique: true })
@@ -16,5 +25,4 @@ export class Item {
   @ManyToOne(() => Category, (cat) => cat.items)
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
   category: Category;
-
 }

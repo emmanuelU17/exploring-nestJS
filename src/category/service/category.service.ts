@@ -4,17 +4,13 @@ import { CustomDuplicateException } from '@/exception/custom-duplicate.exception
 import { Category } from '../entities/category.entity';
 import { CategoryRepository } from '../repository/category.repository';
 import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
-import { Item } from '@/item/entities/item.entity';
 import { UpdateCategoryDto } from '@/category/dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
-
   private static readonly log = new Logger(CategoryService.name);
 
-  constructor(
-    private readonly repository: CategoryRepository,
-  ) {}
+  constructor(private readonly repository: CategoryRepository) {}
 
   /**
    * Retrieves a specific {@link Category} object by its unique identifier.
@@ -27,8 +23,7 @@ export class CategoryService {
    */
   async categoryById(id: number): Promise<Category> {
     try {
-      return await this.repository
-        .findOneOrFail({ where: { id: id } });
+      return await this.repository.findOneOrFail({ where: { id: id } });
     } catch (e) {
       throw new CustomNotFoundException('category not found');
     }
@@ -51,19 +46,11 @@ export class CategoryService {
       parent = await this.categoryById(dto.parentId);
     }
 
+    const category = this.repository.create({ name: dto.name, parent: parent });
     try {
-      const category = this.repository
-        .create({
-          name: dto.name,
-          parent: parent,
-          children: [] as Category[],
-          items: [] as Item[]
-        })
-
-      await this.repository.manager
-        .transaction(async (manager) => {
-          await manager.save(category);
-        })
+      await this.repository.manager.transaction(
+        async (manager) => await manager.save(category),
+      );
     } catch (e) {
       CategoryService.log.error('error creating category: ', e);
       throw new CustomDuplicateException(`${dto.name} exists.`);
@@ -73,5 +60,4 @@ export class CategoryService {
   async update(dto: UpdateCategoryDto): Promise<void> {
     await this.repository.updateByCategoryId(dto);
   }
-
 }

@@ -67,5 +67,6 @@ $ npm run test:cov
 2. [Snake Naming Strategy](https://socket.dev/npm/package/typeorm-naming-strategy)
 3. [tsconfig paths needed to run TypeORM migration](https://www.npmjs.com/package/tsconfig-paths)
 4. [Transaction TypeORM](https://orkhan.gitbook.io/typeorm/docs/transactions)
+5. [Custom Repository](https://github.com/typeorm/typeorm/issues/9013)
 
 ## Architecture

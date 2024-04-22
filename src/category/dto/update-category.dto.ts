@@ -6,6 +6,6 @@ import { IsDefined, IsNumber } from 'class-validator';
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
   @Expose({ name: 'category_id' })
   @IsDefined()
-  @IsNumber({ allowNaN: false, }, { message: 'cannot be negative or null'})
+  @IsNumber({ allowNaN: false }, { message: 'cannot be negative or null' })
   readonly categoryId: number;
 }

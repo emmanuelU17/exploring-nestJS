@@ -4,7 +4,6 @@ import { API_PREFIX } from '@/util';
 
 @Controller(`${API_PREFIX}item`)
 export class ItemController {
-
   constructor(private readonly service: ItemService) {}
 
   @Get()
@@ -12,5 +11,4 @@ export class ItemController {
   async hello(): Promise<string> {
     return 'Hello World!';
   }
-
 }

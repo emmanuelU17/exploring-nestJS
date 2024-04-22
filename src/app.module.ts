@@ -9,7 +9,7 @@ import { ItemModule } from './item/item.module';
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     DatabaseModule,
     CategoryModule,
-    ItemModule
+    ItemModule,
   ],
 })
 export class AppModule {}

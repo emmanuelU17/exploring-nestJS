@@ -9,10 +9,6 @@ import { DataSource, DataSourceOptions } from 'typeorm';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (service: ConfigService) => {
-        if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'test') {
-          // await CustomCompose.composeUp();
-        }
-
         return {
           type: 'mysql',
           host: service.getOrThrow<string>('MYSQL_HOST'),
@@ -21,11 +17,12 @@ import { DataSource, DataSourceOptions } from 'typeorm';
           password: service.getOrThrow<string>('MYSQL_PASSWORD'),
           database: service.getOrThrow<string>('MYSQL_DATABASE'),
           synchronize: false, // think of this as hibernate create-drop. default is false means we want to use migrations.
-          entities: ['dist/**/*.entity.js'],
-          migrations: ['dist/migration/*js'],
+          entities: [__dirname + '/../**/*.entity.{js,ts}'],
+          migrations: [__dirname + '/migrations/*.{js,ts}'],
         } as DataSourceOptions;
       },
-      dataSourceFactory: async (options) => await new DataSource(options).initialize(),
+      dataSourceFactory: async (options) =>
+        await new DataSource(options).initialize(),
     }),
   ],
 })

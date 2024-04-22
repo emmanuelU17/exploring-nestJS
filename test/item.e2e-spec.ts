@@ -11,7 +11,7 @@ describe('ItemController test', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
+      imports: [AppModule],
     }).compile();
 
     app = module.createNestApplication();
@@ -26,5 +26,4 @@ describe('ItemController test', () => {
       .expect(HttpStatus.OK)
       .expect('Hello World!');
   });
-
 });
