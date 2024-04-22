@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Category } from '@/category/entities/category.entity';
+import { Category } from '@/category/category.entity';
 
 @Entity({ name: 'item' })
 export class Item {

@@ -1,8 +1,9 @@
-import { Category } from '../entities/category.entity';
+import { Category } from './category.entity';
 import { Injectable } from '@nestjs/common';
 import { CustomNotFoundException } from '@/exception/custom-not-found.exception';
-import { UpdateCategoryDto } from '@/category/dto/update-category.dto';
 import { DataSource, Repository } from 'typeorm';
+import { ICategory } from '@/category/category.db-mapper';
+import { UpdateCategoryDto } from '@/category/category.dto';
 
 @Injectable()
 export class CategoryRepository extends Repository<Category> {
@@ -14,13 +15,12 @@ export class CategoryRepository extends Repository<Category> {
     );
   }
 
-  async categoryByName(name: string): Promise<Category> {
-    const all: Category[] = await super.query(
-      `SELECT * FROM category c WHERE c.name = ?`,
-      [name],
+  async categoryByName(name: string): Promise<ICategory> {
+    const res: ICategory[] = await super.query(
+      `SELECT * FROM category WHERE name = '${name}'`,
     );
 
-    if (all) return all[0];
+    if (res) return res[0];
 
     throw new CustomNotFoundException(`${name} does not exist`);
   }
@@ -39,15 +39,15 @@ export class CategoryRepository extends Repository<Category> {
    */
   async updateByCategoryId(dto: UpdateCategoryDto): Promise<void> {
     await this.dataSource.manager.transaction(async (manager) => {
-      await manager.query(`
+      const bool = !!dto.parentId;
+
+      const query = `
           UPDATE category c
-          SET c.name = ${dto.name}, c.parent_id = (
-                CASE WHEN (${dto.parentId} !== ${undefined} OR ${dto.parentId} !== ${null})
-                    THEN ${dto.parentId}
-                    ELSE c.parent_id
-              )
-          WHERE c.category_id = ${dto.categoryId}
-      `);
+          SET c.name      = '${dto.name}',
+              c.parent_id = CASE WHEN ${bool} THEN ${dto.parentId} ELSE NULL END
+          WHERE c.category_id = ${dto.categoryId};`;
+
+      await manager.query(query);
     });
   }
 }

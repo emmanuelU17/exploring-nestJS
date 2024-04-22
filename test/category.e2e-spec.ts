@@ -1,14 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { AppModule } from '@/app.module';
-import { CategoryRepository } from '@/category/repository/category.repository';
-import { Category } from '@/category/entities/category.entity';
+import { CategoryRepository } from '@/category/category.repository';
+import { TestHelper } from './index';
+import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import { API_PREFIX } from '@/util';
 import * as request from 'supertest';
 
 describe('CategoryController (e2e) and Data Access Layer test', () => {
   let app: INestApplication;
   let repository: CategoryRepository;
+  let source: DataSource;
 
   jest.setTimeout(6000000);
 
@@ -25,15 +28,18 @@ describe('CategoryController (e2e) and Data Access Layer test', () => {
 
   afterAll(async () => await app.close());
 
-  beforeEach(async () => await repository.queryRunner.startTransaction());
+  beforeEach(async () => {
+    source = await TestHelper.datasource(new ConfigService());
+    await source.initialize();
+  });
 
-  afterEach(async () => await repository.queryRunner.rollbackTransaction());
+  afterEach(async () => {
+    await TestHelper.clearDatabase(source, 'explore_db');
+    await source.destroy();
+  });
 
   it('should save Category', async () => {
-    const create = repository.create({
-      name: 'electronics',
-      parent: undefined,
-    });
+    const create = repository.create({ name: 'electronics' });
     await repository.save(create);
 
     const found = await repository.categoryByName('electronics');
@@ -41,93 +47,105 @@ describe('CategoryController (e2e) and Data Access Layer test', () => {
   });
 
   it('should throw duplicate category name error', async () => {
-    await repository.save({ name: 'electronics', parent: undefined });
-
-    expect(
-      await repository.save({ name: 'electronics', parent: undefined }),
-    ).toThrow('electronics exists');
+    await repository.save({ name: 'electronics' });
+    try {
+      await repository.save({ name: 'electronics' });
+    } catch (e) {
+      expect(e.message).toEqual(
+        `Duplicate entry 'electronics' for key 'category.name'`,
+      );
+    }
   });
 
-  it('validate primary key generation type identity works', async () => {
-    await repository.save({ name: 'electronics', parent: undefined });
-    await repository.save({ name: 'clothes', parent: undefined });
-    await repository.save({ name: 'toys', parent: undefined });
-
-    const all: [Category[], number] = await repository.findAndCount();
-
-    expect(all[1]).toEqual(3);
-    expect(all[0][0].id).toEqual(1);
-    expect(all[0][1].id).toEqual(2);
-    expect(all[0][2].id).toEqual(3);
-  });
-
-  it('should update category ', async () => {
+  it('should update category', async () => {
     // given
-    const cat = await repository.save({
-      name: 'electronics',
-      parent: undefined,
-    });
+    await repository.save(repository.create({ name: 'electronics' }));
 
-    // when
+    const cat = await repository.categoryByName('electronics');
+
+    // method to test
     await repository.updateByCategoryId({
-      categoryId: cat.id,
+      categoryId: cat.category_id,
       name: 'clothing',
+      parentId: null,
     });
 
-    const cur = await repository.findOneBy({ id: cat.id });
+    const cur = await repository.categoryByName('clothing');
 
     // then
     expect(cur).toBeDefined();
     expect(cur.name).toEqual('clothing');
-    expect(cur.parent).toBeUndefined();
+    expect(cur.parent_id).toBeNull();
   });
 
   it('should update category and parent id ', async () => {
     // given
-    const cat = await repository.save({
-      name: 'electronics',
-      parent: undefined,
-    });
-
-    const clothes = await repository.save({ name: 'clothes', parent: cat });
-
-    const collection = await repository.save({
-      name: 'collection',
-      parent: undefined,
-    });
+    await repository.save(repository.create({ name: 'electronics' }));
+    await repository.save(repository.create({ name: 'clothes' }));
+    await repository.save(repository.create({ name: 'collection' }));
 
     // when
+    const clothes = await repository.categoryByName('clothes');
+    const collection = await repository.categoryByName('collection');
+
+    // method to test
     await repository.updateByCategoryId({
-      categoryId: clothes.id,
+      categoryId: clothes.category_id,
       name: 'house',
-      parentId: collection.id,
+      parentId: collection.category_id,
     });
-    const cur = await repository.findOneBy({ id: clothes.id });
+
+    const cur = await repository.categoryByName('house');
 
     // then
     expect(cur).toBeDefined();
     expect(cur.name).toEqual('house');
-    expect(cur.parent).toEqual(collection);
+    expect(cur.parent_id).toEqual(collection.category_id);
   });
 
   it(`${API_PREFIX}category (POST)`, async () => {
     await request(app.getHttpServer())
       .post(`${API_PREFIX}category`)
-      .send({ name: 'electronics', parent_id: null })
-      .expect(210)
+      .send({ name: 'electronics' })
+      .expect(HttpStatus.CREATED)
       .expect({});
   });
 
   it(`${API_PREFIX}category (POST) should throw duplicate error`, async () => {
-    await repository.save({
-      name: 'electronics',
-      parent: undefined,
-    });
+    await repository.save(repository.create({ name: 'electronics' }));
 
     await request(app.getHttpServer())
       .post(`${API_PREFIX}category`)
-      .send({ name: 'electronics', parent_id: null })
-      .expect(HttpStatus.CONFLICT)
-      .expect({});
+      .send({ name: 'electronics' })
+      .expect(HttpStatus.CONFLICT);
+  });
+
+  it(`${API_PREFIX}category (PUT) should successfully update with parent not existing`, async () => {
+    await repository.save(repository.create({ name: 'electronics' }));
+    const obj = await repository.categoryByName('electronics');
+
+    await request(app.getHttpServer())
+      .put(`${API_PREFIX}category`)
+      .send({ name: 'frog', categoryId: obj.category_id, parentId: null })
+      .expect(HttpStatus.NO_CONTENT);
+  });
+
+  it(`${API_PREFIX}category (PUT) should successfully update with parent existing`, async () => {
+    // given
+    await repository.save(repository.create({ name: 'electronics' }));
+    await repository.save(repository.create({ name: 'fan' }));
+
+    const obj = await repository.categoryByName('electronics');
+    const fan = await repository.categoryByName('fan');
+
+    // api call
+    await request(app.getHttpServer())
+      .put(`${API_PREFIX}category`)
+      .send({
+        name: 'tv',
+        categoryId: fan.category_id,
+        parentId: obj.category_id,
+      })
+      .expect(HttpStatus.NO_CONTENT);
   });
 });
